@@ -1,4 +1,4 @@
-var TODOList = React.createClass({
+var List = React.createClass({
     getInitialState: function() {
         return {
             items: [
@@ -23,4 +23,4 @@ var TODOList = React.createClass({
 });
 
 
-React.render(<TODOList />, document.getElementById('workspace'));
+React.render(<List />, document.getElementById('workspace'));
