@@ -1,0 +1,14 @@
+.complete {
+    color: #ccc;
+    text-decoration: line-through;
+}
+
+li {
+    list-style-type: none;
+    margin-left: -20px;
+}
+
+li span {
+    margin-left: 10px;
+}
+

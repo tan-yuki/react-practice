@@ -1,3 +1,44 @@
+var TODOItem = React.createClass({
+
+    getInitialState: function() {
+        return {
+            label: this.props.label,
+            complete: this.props.complete
+        };
+    },
+
+    toggle: function() {
+        this.setState({
+            complete: !this.state.complete
+        });
+    },
+
+    onCheck: function(e) {
+        this.toggle();
+    },
+
+    onClick: function(e) {
+        this.toggle();
+    },
+
+    render: function() {
+        var state = this.state;
+
+        var label = state.label;
+        var complete = state.complete;
+
+        return (<li className={complete ? "complete" : "yet"} onClick={this.onClick}>
+            <input
+                type="checkbox"
+                ref="check"
+                onCheck={this.onCheck}
+                defaultChecked={complete} />
+
+            <span>{label}</span>
+        </li>);
+    }
+});
+
 var TODOList = React.createClass({
     getInitialState: function() {
         return {
@@ -11,11 +52,7 @@ var TODOList = React.createClass({
 
     render: function() {
         var list = _.map(this.state.items, function(item) {
-            return (
-                <li className={item.complete ? "complete" : "yet"}>
-                  {item.label}
-                </li>
-            );
+            return (<TODOItem label={item.label} complete={item.complete} />);
         });
 
         return (<ul>{list}</ul>);
@@ -26,9 +63,8 @@ var TODOForm = React.createClass({
     onSubmit: function(e) {
         e.preventDefault();
 
-        var todo = this.refs.todo.getDOMNode().value;
+        var todoName = this.refs.todo.getDOMNode().value;
 
-        alert(todo);
     },
 
     render: function() {
