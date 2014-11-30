@@ -26,13 +26,14 @@ var TODOItem = React.createClass({
 
         var label = state.label;
         var complete = state.complete;
+        var id = this.props.id;
 
         return (<li className={complete ? "complete" : "yet"} onClick={this.onClick}>
             <input
                 type="checkbox"
                 ref="check"
-                onCheck={this.onCheck}
-                defaultChecked={complete} />
+                onChange={this.onCheck}
+                checked={complete} />
 
             <span>{label}</span>
         </li>);
@@ -40,19 +41,9 @@ var TODOItem = React.createClass({
 });
 
 var TODOList = React.createClass({
-    getInitialState: function() {
-        return {
-            items: [
-                {label: 'hoge', complete: false},
-                {label: 'fuga', complete: true},
-                {label: 'bar',  complete: false},
-            ]
-        };
-    },
-
     render: function() {
-        var list = _.map(this.state.items, function(item) {
-            return (<TODOItem label={item.label} complete={item.complete} />);
+        var list = this.props.items.map(function(item) {
+            return (<TODOItem label={item.label} complete={item.complete} id={item.id} key={item.id} />);
         });
 
         return (<ul>{list}</ul>);
@@ -60,23 +51,50 @@ var TODOList = React.createClass({
 });
 
 var TODOForm = React.createClass({
+
     onSubmit: function(e) {
         e.preventDefault();
 
         var todoName = this.refs.todo.getDOMNode().value;
+        if (!todoName) {
+            return;
+        }
 
+        this.props.addNewTodo({
+            label: todoName,
+            complete: false
+        });
+
+        this.refs.todo.getDOMNode().value = '';
     },
 
     render: function() {
-        return <form onSubmit={this.onSubmit}><input type="text" ref="todo"/></form>;
+        return <form onSubmit={this.onSubmit}><input type="text" ref="todo" /></form>;
     }
 });
 
 var TODO = React.createClass({
+
+    getInitialState: function() {
+        return {
+            items: []
+        };
+    },
+
+    addNewTodo: function(item) {
+        var items = this.state.items;
+
+        var newId = items.length + 1;
+        items.push(_.extend(item, {
+            id: newId
+        }));
+        this.setState(items);
+    },
+
     render: function() {
         return (<div id="contents">
-            <TODOForm />
-            <TODOList />
+            <TODOForm addNewTodo={this.addNewTodo} />
+            <TODOList items={this.state.items} />
         </div>);
     }
 });
