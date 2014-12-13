@@ -1,38 +1,34 @@
 var TODOItem = React.createClass({
 
+    propTypes: {
+        todo: React.PropTypes.shape({
+            id:       React.PropTypes.number.isRequired,
+            label:    React.PropTypes.string.isRequired,
+            complete: React.PropTypes.bool.isRequired
+        }),
+        onClick:  React.PropTypes.func.isRequired
+    },
+
     getInitialState: function() {
-        return {
-            label: this.props.label,
-            complete: this.props.complete
-        };
-    },
-
-    toggle: function() {
-        this.setState({
-            complete: !this.state.complete
-        });
-    },
-
-    onCheck: function(e) {
-        this.toggle();
+        return this.props.todo;
     },
 
     onClick: function(e) {
-        this.toggle();
+        this.props.onClick(this.props.todo.id);
     },
 
     render: function() {
-        var state = this.state;
+        var todo = this.state;
 
-        var label = state.label;
-        var complete = state.complete;
-        var id = this.props.id;
+        var id       = todo.id;
+        var label    = todo.label;
+        var complete = todo.complete;
 
         return (<li className={complete ? "complete" : "yet"} onClick={this.onClick}>
             <input
                 type="checkbox"
                 ref="check"
-                onChange={this.onCheck}
+                onChange={this.onClick}
                 checked={complete} />
 
             <span>{label}</span>
@@ -41,9 +37,26 @@ var TODOItem = React.createClass({
 });
 
 var TODOList = React.createClass({
+
+    propTypes: {
+        items:   React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+        onClick: React.PropTypes.func.isRequired
+    },
+
+    getInitialState: function() {
+        return {
+            items: this.props.items
+        };
+    },
+
     render: function() {
-        var list = this.props.items.map(function(item) {
-            return (<TODOItem label={item.label} complete={item.complete} id={item.id} key={item.id} />);
+        var onClick = this.props.onClick;
+        var list = _.map(this.state.items, function(item) {
+            return (<TODOItem
+                key={item.id}
+                todo={item}
+                onClick={onClick}
+            />);
         });
 
         return (<ul>{list}</ul>);
@@ -51,6 +64,10 @@ var TODOList = React.createClass({
 });
 
 var TODOForm = React.createClass({
+
+    propTypes: {
+        addNewTodo: React.PropTypes.func.isRequired
+    },
 
     onSubmit: function(e) {
         e.preventDefault();
@@ -73,11 +90,38 @@ var TODOForm = React.createClass({
     }
 });
 
+var TODOInfo = React.createClass({
+    propTypes: {
+        items: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+    },
+
+    render: function() {
+        var items = this.props.items;
+
+        var completedCount = _.filter(items, function(item) {
+                return item.complete;
+            }).length;
+
+        var remainCount = items.length - completedCount;
+
+        return (<div>
+            <ul>
+              <li><span>completed: {completedCount}</span></li>
+              <li><span>remain: {remainCount}</span></li>
+            </ul>
+        </div>);
+    }
+});
+
 var TODO = React.createClass({
 
     getInitialState: function() {
         return {
-            items: []
+            items: [
+                {id: 1, label: 'hoge', complete: false},
+                {id: 2, label: 'fuga', complete: true},
+                {id: 3, label: 'bar',  complete: false},
+            ]
         };
     },
 
@@ -91,10 +135,23 @@ var TODO = React.createClass({
         this.setState(items);
     },
 
+    onClick: function(id) {
+        var items = this.state.items;
+
+        this.setState(_.map(items, function(item) {
+            if (item.id === id) {
+                item.complete = !item.complete;
+            }
+
+            return item;
+        }));
+    },
+
     render: function() {
         return (<div id="contents">
             <TODOForm addNewTodo={this.addNewTodo} />
-            <TODOList items={this.state.items} />
+            <TODOList items={this.state.items} onClick={this.onClick} />
+            <TODOInfo items={this.state.items} />
         </div>);
     }
 });
